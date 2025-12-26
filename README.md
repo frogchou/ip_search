@@ -24,7 +24,7 @@
 ### 1. 克隆项目
 
 ```bash
-git clone <项目地址>
+git clone https://github.com/frogchou/ip_search.git
 cd ip_search
 ```
 
@@ -85,7 +85,7 @@ python setup_cron.py
 
 ### 6. 访问服务
 
-- Web界面：http://localhost:8001
+- Web界面：http://localhost:8001/static/index.html
 - API接口：http://localhost:8001/api/ipsearch?ip=8.8.8.8
 - 版本信息：http://localhost:8001/api/ipdb/version
 
