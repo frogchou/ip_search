@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+requests
+msgpack
+pycryptodome
+slowapi
+python-dotenv
+python-crontab
