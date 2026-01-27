@@ -4,7 +4,7 @@ services:
   ip-search:
     build: .
     ports:
-      - "8001:8001"
+      - "8138:8001"
     volumes:
       - .:/app
     restart: always
