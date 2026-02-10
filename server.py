@@ -55,10 +55,14 @@ async def get_client_ip(request: Request):
     client_ip = request.client.host
     return client_ip
 
-@app.get("/api/ipsearch")
-@limiter.limit("15/minute")  # 限制每分钟15次请求
-async def api_ipsearch(ip: str, request: Request):
-    """IP查询API端点"""
+def get_client_ip_from_request(request: Request) -> str:
+    forwarded_for = request.headers.get("x-forwarded-for")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    return request.client.host
+
+
+def build_ip_response(ip: str) -> dict:
     try:
         result = czdb_search(ip)
         # 解析czdb_search返回的结果
@@ -81,16 +85,30 @@ async def api_ipsearch(ip: str, request: Request):
                 "district": district,
                 "isp": isp
             }
-        else:
-            return {
-                "ip": ip,
-                "error": "未找到IP地址信息"
-            }
+        return {
+            "ip": ip,
+            "error": "未找到IP地址信息"
+        }
     except Exception as e:
         return {
             "ip": ip,
             "error": str(e)
         }
+
+
+@app.get("/api/ipsearch")
+@limiter.limit("15/minute")  # 限制每分钟15次请求
+async def api_ipsearch(ip: str, request: Request):
+    """IP查询API端点"""
+    return build_ip_response(ip)
+
+
+@app.get("/api/clientinfo")
+@limiter.limit("15/minute")
+async def api_clientinfo(request: Request):
+    """获取当前访问用户的IP及归属地"""
+    client_ip = get_client_ip_from_request(request)
+    return build_ip_response(client_ip)
 
 @app.get("/api/ipdb/version")
 async def get_ipdb_version():
