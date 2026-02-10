@@ -65,6 +65,17 @@
             font-style: italic;
         }
 
+        .current-info {
+            margin-top: 12px;
+            padding: 12px;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+        }
+
         .search-section {
             padding: 20px;
             border-bottom: 1px solid var(--border-color);
@@ -202,6 +213,7 @@
             <h1>IP地址查询</h1>
             <p>Geek's Dark Toolkit</p>
             <div id="versionInfo" class="version-info"></div>
+            <div id="currentInfo" class="current-info">当前访问IP: 加载中...</div>
         </div>
 
         <div class="search-section">
@@ -253,7 +265,7 @@
         }
 
         function addToHistory(ip, result) {
-            const history = getHistory();
+            const history = getHistory().filter(record => record.ip !== ip);
             const newRecord = {
                 ip,
                 result,
@@ -351,10 +363,26 @@
             }
         }
 
+        async function loadClientInfo() {
+            const currentInfo = document.getElementById('currentInfo');
+            try {
+                const response = await fetch('/api/clientinfo');
+                const result = await response.json();
+                if (result.error) {
+                    currentInfo.textContent = `当前访问IP: ${result.ip}\n归属地: ${result.error}`;
+                    return;
+                }
+                currentInfo.textContent = `当前访问IP: ${result.ip}\n国家: ${result.country || '未知'}\n省份: ${result.province || '未知'}\n城市: ${result.city || '未知'}\n区域: ${result.district || '未知'}\n运营商: ${result.isp || '未知'}`;
+            } catch (error) {
+                currentInfo.textContent = `当前访问IP: 获取失败 (${error.message})`;
+            }
+        }
+
         // 页面加载时渲染历史记录和版本信息
         window.addEventListener('load', () => {
             renderHistory();
             loadVersionInfo();
+            loadClientInfo();
         });
     </script>
 </body>
